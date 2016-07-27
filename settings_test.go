@@ -32,7 +32,7 @@ func TestClient_Settings(t *testing.T) {
 		us, err = c.UpdateSettings(&UpdateSettingsInput{
 			Service:    testServiceID,
 			Version:    tv.Number,
-			DefaultTTL: 1800,
+			DefaultTTL: "1800",
 		})
 	})
 	if err != nil {
