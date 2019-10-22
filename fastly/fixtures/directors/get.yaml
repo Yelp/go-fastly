@@ -1,0 +1,46 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: ""
+    form: {}
+    headers:
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/17/director/test-director
+    method: GET
+  response:
+    body: '{"capacity":100,"service_id":"7i6HN3TK9wS159v2gPAZ8A","version":17,"created_at":"2019-05-08T22:55:00Z","quorum":50,"retries":5,"deleted_at":null,"type":1,"shield":null,"backends":[],"name":"test-director","comment":"","updated_at":"2019-05-08T22:55:00Z"}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Age:
+      - "0"
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 08 May 2019 22:55:01 GMT
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9037-CONTROL-SLWDC, cache-sjc3629-SJC
+      X-Timer:
+      - S1557356101.820570,VS0,VE414
+    status: 200 OK
+    code: 200

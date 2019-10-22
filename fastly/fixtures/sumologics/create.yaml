@@ -1,0 +1,66 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: Service=7i6HN3TK9wS159v2gPAZ8A&Version=46&format=format&format_version=1&message_type=classic&name=test-sumologic&placement=waf_debug&url=https%3A%2F%2Ffoo.sumologic.com
+    form:
+      Service:
+      - 7i6HN3TK9wS159v2gPAZ8A
+      Version:
+      - "46"
+      format:
+      - format
+      format_version:
+      - "1"
+      message_type:
+      - classic
+      name:
+      - test-sumologic
+      placement:
+      - waf_debug
+      url:
+      - https://foo.sumologic.com
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/46/logging/sumologic
+    method: POST
+  response:
+    body: '{"format":"format","format_version":"1","message_type":"classic","name":"test-sumologic","placement":"waf_debug","url":"https://foo.sumologic.com","service_id":"7i6HN3TK9wS159v2gPAZ8A","version":"46","created_at":"2019-05-09T23:21:58Z","updated_at":"2019-05-09T23:21:58Z","response_condition":"","deleted_at":null}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 09 May 2019 23:21:58 GMT
+      Fastly-Ratelimit-Remaining:
+      - "992"
+      Fastly-Ratelimit-Reset:
+      - "1557446400"
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9036-CONTROL-SLWDC, cache-sjc3649-SJC
+      X-Timer:
+      - S1557444118.840213,VS0,VE512
+    status: 200 OK
+    code: 200

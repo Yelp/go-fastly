@@ -1,28 +1,29 @@
 Go Fastly
 =========
-[![Build Status](http://img.shields.io/travis/sethvargo/go-fastly.svg?style=flat-square)][travis]
+[![Build Status](http://img.shields.io/travis/fastly/go-fastly.svg?style=flat-square)][travis]
 [![Go Documentation](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)][godocs]
 
-[travis]: http://travis-ci.org/sethvargo/go-fastly
-[godocs]: http://godoc.org/github.com/sethvargo/go-fastly
+[travis]: http://travis-ci.org/fastly/go-fastly
+[godocs]: http://godoc.org/github.com/fastly/go-fastly
 
 Go Fastly is a Golang API client for interacting with most facets of the
 [Fastly API](https://docs.fastly.com/api).
 
 Installation
 ------------
-This is a client library, so there is nothing to install.
+This is a client library, so there is nothing to install. You must be running Go
+1.8 or higher.
 
 Usage
 -----
 Download the library into your `$GOPATH`:
 
-    $ go get github.com/sethvargo/go-fastly
+    $ go get github.com/fastly/go-fastly/fastly
 
 Import the library into your tool:
 
 ```go
-import "github.com/sethvargo/go-fastly"
+import "github.com/fastly/go-fastly/fastly"
 ```
 
 Examples
@@ -47,7 +48,7 @@ if err != nil {
 }
 
 // You can find the service ID in the Fastly web console.
-var serviceID = "SU1Z0isxPaozGVKXdv0eY"
+var serviceID = "SERVICE_ID"
 
 // Get the latest active version
 latest, err := client.LatestVersion(&fastly.LatestVersionInput{
@@ -81,8 +82,23 @@ if err != nil {
 // Output: "example.com"
 fmt.Println(domain.Name)
 
+// And we will also add a new backend.
+backend, err := client.CreateBackend(&fastly.CreateBackendInput{
+  Service: serviceID,
+  Version: version.Number,
+  Name:    "example-backend",
+  Address: "127.0.0.1",
+  Port:    80,
+})
+if err != nil {
+  log.Fatal(err)
+}
+
+// Output: "example-backend"
+fmt.Println(backend.Name)
+
 // Now we can validate that our version is valid.
-valid, err := client.ValidateVersion(&fastly.ValidateVersionInput{
+valid, _, err := client.ValidateVersion(&fastly.ValidateVersionInput{
   Service: serviceID,
   Version: version.Number,
 })
@@ -103,11 +119,11 @@ if err != nil {
 }
 
 // Output: true
-fmt.Printf("%b", activeVersion.Locked)
+fmt.Printf("%t\n", activeVersion.Locked)
 ```
 
 More information can be found in the
-[Fastly Godoc](https://godoc.org/github.com/sethvargo/go-fastly).
+[Fastly Godoc](https://godoc.org/github.com/fastly/go-fastly).
 
 License
 -------

@@ -1,0 +1,47 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: ""
+    form: {}
+    headers:
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/stats/usage_by_service?by=minute&from=10+days+ago&region=usa&to=now
+    method: GET
+  response:
+    body: '{"data":{"anzac":{},"asia":{},"asia_india":{},"europe":{},"latam":{},"south_africa":{},"southamerica_std":{},"usa":{}},"status":"success","msg":null,"meta":{"from":"2019-05-01
+      03:33:50 UTC","to":"2019-05-11 03:33:50 UTC","by":"minute","region":"usa"}}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Age:
+      - "0"
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 11 May 2019 03:33:52 GMT
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Content-Type-Options:
+      - nosniff
+      X-Served-By:
+      - cache-control-slwdc9037-CONTROL-SLWDC, cache-lax8622-LAX
+      X-Timer:
+      - S1557545630.406590,VS0,VE1886
+    status: 200 OK
+    code: 200

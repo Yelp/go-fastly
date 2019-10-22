@@ -1,0 +1,58 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: Service=7i6HN3TK9wS159v2gPAZ8A&Version=27&address=integ-test.go-fastly.com&name=test-backend
+    form:
+      Service:
+      - 7i6HN3TK9wS159v2gPAZ8A
+      Version:
+      - "27"
+      address:
+      - integ-test.go-fastly.com
+      name:
+      - test-backend
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/27/backend
+    method: POST
+  response:
+    body: '{"address":"integ-test.go-fastly.com","name":"test-backend","service_id":"7i6HN3TK9wS159v2gPAZ8A","version":27,"ssl_client_key":null,"max_tls_version":null,"ssl_sni_hostname":null,"min_tls_version":null,"use_ssl":false,"ipv6":null,"updated_at":"2019-05-09T19:53:12Z","auto_loadbalance":false,"port":80,"comment":"","override_host":null,"weight":100,"hostname":"integ-test.go-fastly.com","first_byte_timeout":15000,"between_bytes_timeout":10000,"ssl_ca_cert":null,"connect_timeout":1000,"ssl_client_cert":null,"ipv4":null,"error_threshold":0,"deleted_at":null,"client_cert":null,"ssl_check_cert":true,"ssl_hostname":null,"healthcheck":null,"ssl_cert_hostname":null,"created_at":"2019-05-09T19:53:12Z","max_conn":200,"ssl_ciphers":null,"request_condition":"","shield":null}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 09 May 2019 19:53:12 GMT
+      Fastly-Ratelimit-Remaining:
+      - "19997"
+      Fastly-Ratelimit-Reset:
+      - "1557432000"
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9037-CONTROL-SLWDC, cache-sjc3644-SJC
+      X-Timer:
+      - S1557431592.056504,VS0,VE283
+    status: 200 OK
+    code: 200

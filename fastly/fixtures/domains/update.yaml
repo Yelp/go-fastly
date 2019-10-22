@@ -1,0 +1,58 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: Name=integ-test.go-fastly.com&Service=7i6HN3TK9wS159v2gPAZ8A&Version=18&name=new-integ-test.go-fastly.com
+    form:
+      Name:
+      - integ-test.go-fastly.com
+      Service:
+      - 7i6HN3TK9wS159v2gPAZ8A
+      Version:
+      - "18"
+      name:
+      - new-integ-test.go-fastly.com
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/18/domain/integ-test.go-fastly.com
+    method: PUT
+  response:
+    body: '{"deleted_at":null,"updated_at":"2019-05-08T23:18:08Z","name":"new-integ-test.go-fastly.com","comment":"comment","service_id":"7i6HN3TK9wS159v2gPAZ8A","created_at":"2019-05-08T23:18:08Z","version":18}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 08 May 2019 23:18:10 GMT
+      Fastly-Ratelimit-Remaining:
+      - "997"
+      Fastly-Ratelimit-Reset:
+      - "1557360000"
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9037-CONTROL-SLWDC, cache-pao17440-PAO
+      X-Timer:
+      - S1557357490.095918,VS0,VE523
+    status: 200 OK
+    code: 200

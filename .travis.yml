@@ -1,13 +1,18 @@
+dist: trusty
 sudo: false
 
 language: go
 
 go:
-  - 1.6
+  - "1.10"
+  - "1.11"
+  - "1.12"
 
 branches:
   only:
     - master
 
-script: make test testrace
+script: make build test test-race
+
+env: GO111MODULE=on
 

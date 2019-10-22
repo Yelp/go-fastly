@@ -34,38 +34,47 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/dnaeon/go-vcr/cassette"
 )
 
+// Mode represents recording/playback mode
+type Mode int
+
 // Recorder states
 const (
-	ModeRecording = iota
+	ModeRecording Mode = iota
 	ModeReplaying
+	ModeDisabled
 )
 
 // Recorder represents a type used to record and replay
 // client and server interactions
 type Recorder struct {
 	// Operating mode of the recorder
-	mode int
+	mode Mode
 
 	// Cassette used by the recorder
 	cassette *cassette.Cassette
 
-	// Transport that can be used by clients to inject
-	Transport *Transport
+	// realTransport is the underlying http.RoundTripper to make real requests
+	realTransport http.RoundTripper
 }
 
-// SetClient can be used to configure the behavior of the 'real' client used in record-mode
-func (r *Recorder) SetClient(client *http.Client) {
-	r.Transport.client = client
+// SetTransport can be used to configure the behavior of the 'real' client used in record-mode
+func (r *Recorder) SetTransport(t http.RoundTripper) {
+	r.realTransport = t
 }
 
 // Proxies client requests to their original destination
-func requestHandler(r *http.Request, c *cassette.Cassette, mode int, client *http.Client) (*cassette.Interaction, error) {
+func requestHandler(r *http.Request, c *cassette.Cassette, mode Mode, realTransport http.RoundTripper) (*cassette.Interaction, error) {
 	// Return interaction from cassette if in replay mode
 	if mode == ModeReplaying {
+		if err := r.Context().Err(); err != nil {
+			return nil, err
+		}
 		return c.GetInteraction(r)
 	}
 
@@ -87,17 +96,18 @@ func requestHandler(r *http.Request, c *cassette.Cassette, mode int, client *htt
 	}
 
 	reqBody := &bytes.Buffer{}
-	if r.Body != nil {
+	if r.Body != nil && !isNoBody(r.Body) {
 		// Record the request body so we can add it to the cassette
 		r.Body = ioutil.NopCloser(io.TeeReader(r.Body, reqBody))
 	}
 
 	// Perform client request to it's original
 	// destination and record interactions
-	resp, err := client.Do(r)
+	resp, err := realTransport.RoundTrip(r)
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	respBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -120,6 +130,12 @@ func requestHandler(r *http.Request, c *cassette.Cassette, mode int, client *htt
 			Code:    resp.StatusCode,
 		},
 	}
+	for _, filter := range c.Filters {
+		err = filter(interaction)
+		if err != nil {
+			return nil, err
+		}
+	}
 	c.AddInteraction(interaction)
 
 	return interaction, nil
@@ -127,35 +143,41 @@ func requestHandler(r *http.Request, c *cassette.Cassette, mode int, client *htt
 
 // New creates a new recorder
 func New(cassetteName string) (*Recorder, error) {
-	var mode int
+	// Default mode is "replay" if file exists
+	return NewAsMode(cassetteName, ModeReplaying, nil)
+}
+
+// NewAsMode creates a new recorder in the specified mode
+func NewAsMode(cassetteName string, mode Mode, realTransport http.RoundTripper) (*Recorder, error) {
 	var c *cassette.Cassette
 	cassetteFile := fmt.Sprintf("%s.yaml", cassetteName)
 
-	// Depending on whether the cassette file exists or not we
-	// either create a new empty cassette or load from file
-	if _, err := os.Stat(cassetteFile); os.IsNotExist(err) {
-		// Create new cassette and enter in recording mode
-		c = cassette.New(cassetteName)
-		mode = ModeRecording
-	} else {
-		// Load cassette from file and enter replay mode
-		c, err = cassette.Load(cassetteName)
-		if err != nil {
-			return nil, err
+	if mode != ModeDisabled {
+		// Depending on whether the cassette file exists or not we
+		// either create a new empty cassette or load from file
+		if _, err := os.Stat(cassetteFile); os.IsNotExist(err) || mode == ModeRecording {
+			// Create new cassette and enter in recording mode
+			c = cassette.New(cassetteName)
+			mode = ModeRecording
+		} else {
+			// Load cassette from file and enter replay mode
+			c, err = cassette.Load(cassetteName)
+			if err != nil {
+				return nil, err
+			}
+			mode = ModeReplaying
 		}
-		mode = ModeReplaying
 	}
 
-	// A transport which can be used by clients to inject
-	transport := &Transport{c: c, mode: mode}
+	if realTransport == nil {
+		realTransport = http.DefaultTransport
+	}
 
 	r := &Recorder{
-		mode:      mode,
-		cassette:  c,
-		Transport: transport,
+		mode:          mode,
+		cassette:      c,
+		realTransport: realTransport,
 	}
-
-	r.SetClient(http.DefaultClient)
 
 	return r, nil
 }
@@ -171,45 +193,83 @@ func (r *Recorder) Stop() error {
 	return nil
 }
 
-// Transport either records or replays responses from a cassette, depending on its mode
-type Transport struct {
-	c      *cassette.Cassette
-	mode   int
-	client *http.Client
-}
-
 // RoundTrip implements the http.RoundTripper interface
-func (t *Transport) RoundTrip(r *http.Request) (*http.Response, error) {
+func (r *Recorder) RoundTrip(req *http.Request) (*http.Response, error) {
+	if r.mode == ModeDisabled {
+		return r.realTransport.RoundTrip(req)
+	}
 	// Pass cassette and mode to handler, so that interactions can be
 	// retrieved or recorded depending on the current recorder mode
-	interaction, err := requestHandler(r, t.c, t.mode, t.client)
+	interaction, err := requestHandler(req, r.cassette, r.mode, r.realTransport)
 
 	if err != nil {
 		return nil, err
 	}
 
-	buf := bytes.NewBuffer([]byte(interaction.Response.Body))
+	select {
+	case <-req.Context().Done():
+		return nil, req.Context().Err()
+	default:
+		buf := bytes.NewBuffer([]byte(interaction.Response.Body))
+		// apply the duration defined in the interaction
+		if interaction.Response.Duration != "" {
+			d, err := time.ParseDuration(interaction.Duration)
+			if err != nil {
+				return nil, err
+			}
+			// block for the configured 'duration' to simulate the network latency and server processing time.
+			<-time.After(d)
+		}
 
-	return &http.Response{
-		Status:        interaction.Response.Status,
-		StatusCode:    interaction.Response.Code,
-		Proto:         "HTTP/1.0",
-		ProtoMajor:    1,
-		ProtoMinor:    0,
-		Request:       r,
-		Header:        interaction.Response.Headers,
-		Close:         true,
-		ContentLength: int64(buf.Len()),
-		Body:          ioutil.NopCloser(buf),
-	}, nil
+		contentLength := int64(buf.Len())
+		// For HTTP HEAD requests, the ContentLength should be set to the size
+		// of the body that would have been sent for a GET.
+		// https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.13
+		if req.Method == "HEAD" {
+			if hdr := interaction.Response.Headers.Get("Content-Length"); hdr != "" {
+				cl, err := strconv.ParseInt(hdr, 10, 64)
+				if err == nil {
+					contentLength = cl
+				}
+			}
+		}
+		return &http.Response{
+			Status:        interaction.Response.Status,
+			StatusCode:    interaction.Response.Code,
+			Proto:         "HTTP/1.0",
+			ProtoMajor:    1,
+			ProtoMinor:    0,
+			Request:       req,
+			Header:        interaction.Response.Headers,
+			Close:         true,
+			ContentLength: contentLength,
+			Body:          ioutil.NopCloser(buf),
+		}, nil
+	}
 }
 
 // CancelRequest implements the github.com/coreos/etcd/client.CancelableTransport interface
-func (t *Transport) CancelRequest(req *http.Request) {
-	// noop
+func (r *Recorder) CancelRequest(req *http.Request) {
+	type cancelableTransport interface {
+		CancelRequest(req *http.Request)
+	}
+	if ct, ok := r.realTransport.(cancelableTransport); ok {
+		ct.CancelRequest(req)
+	}
 }
 
 // SetMatcher sets a function to match requests against recorded HTTP interactions.
 func (r *Recorder) SetMatcher(matcher cassette.Matcher) {
-	r.cassette.Matcher = matcher
+	if r.cassette != nil {
+		r.cassette.Matcher = matcher
+	}
+}
+
+// AddFilter appends a hook to modify a request before it is recorded.
+//
+// Filters are useful for filtering out sensitive parameters from the recorded data.
+func (r *Recorder) AddFilter(filter cassette.Filter) {
+	if r.cassette != nil {
+		r.cassette.Filters = append(r.cassette.Filters, filter)
+	}
 }

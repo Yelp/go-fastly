@@ -1,0 +1,58 @@
+---
+version: 1
+rwmutex: {}
+interactions:
+- request:
+    body: Name=test-papertrail&Service=7i6HN3TK9wS159v2gPAZ8A&Version=68&name=new-test-papertrail
+    form:
+      Name:
+      - test-papertrail
+      Service:
+      - 7i6HN3TK9wS159v2gPAZ8A
+      Version:
+      - "68"
+      name:
+      - new-test-papertrail
+    headers:
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Fastly-Key:
+      - xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      User-Agent:
+      - FastlyGo/0.4.3.dev (+github.com/fastly/go-fastly; go1.12)
+    url: https://api.fastly.com/service/7i6HN3TK9wS159v2gPAZ8A/version/68/logging/papertrail/test-papertrail
+    method: PUT
+  response:
+    body: '{"deleted_at":null,"name":"new-test-papertrail","response_condition":"","service_id":"7i6HN3TK9wS159v2gPAZ8A","format_version":"2","placement":"waf_debug","port":"1234","format":"format","updated_at":"2019-06-06T22:12:54Z","version":"68","created_at":"2019-06-06T22:12:54Z","address":"integ-test.go-fastly.com","hostname":"integ-test.go-fastly.com","public_key":null}'
+    headers:
+      Accept-Ranges:
+      - bytes
+      Cache-Control:
+      - no-cache
+      Content-Type:
+      - application/json
+      Date:
+      - Thu, 06 Jun 2019 22:12:56 GMT
+      Fastly-Ratelimit-Remaining:
+      - "979"
+      Fastly-Ratelimit-Reset:
+      - "1559862000"
+      Status:
+      - 200 OK
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Accept-Encoding
+      Via:
+      - 1.1 varnish
+      - 1.1 varnish
+      X-Cache:
+      - MISS, MISS
+      X-Cache-Hits:
+      - 0, 0
+      X-Served-By:
+      - cache-control-slwdc9037-CONTROL-SLWDC, cache-sjc3621-SJC
+      X-Timer:
+      - S1559859176.003211,VS0,VE851
+    status: 200 OK
+    code: 200

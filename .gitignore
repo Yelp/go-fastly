@@ -3,7 +3,7 @@
 *.o
 *.a
 *.so
-
+*.idea/
 # Folders
 _obj
 _test
@@ -26,3 +26,5 @@ _testmain.go
 
 bin/
 pkg/
+
+.envrc
